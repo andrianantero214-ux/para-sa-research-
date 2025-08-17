@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CRUSH (Prank)</title>
+
+<!-- Simple, clean styling -->
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent:#ff5c8a;
+    --muted:#9aa4b2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(255,92,138,0.06), transparent),
+                linear-gradient(180deg,#081021 0%, #071321 100%);
+    color:#e6eef6;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+
+  .card{
+    width:100%;
+    max-width:720px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+    border-radius:16px;
+    padding:28px;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  }
+
+  h1{
+    margin:0 0 8px 0;
+    font-size:28px;
+    line-height:1.05;
+    letter-spacing:0.4px;
+  }
+  p.lead{ margin:0 0 18px 0; color:var(--muted); }
+
+  .choices{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  button.choice{
+    flex:1 1 120px;
+    padding:12px 16px;
+    border-radius:12px;
+    border:0;
+    background:transparent;
+    color:inherit;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s;
+    border:1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
+  }
+  button.choice:hover{ transform:translateY(-4px); box-shadow:0 8px 20px rgba(2,6,23,0.45); }
+
+  .result{
+    margin-top:18px;
+    padding:14px;
+    border-radius:10px;
+    background: linear-gradient(90deg, rgba(255,92,138,0.06), rgba(72,88,255,0.03));
+    border:1px solid rgba(255,255,255,0.02);
+    min-height:56px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .controls{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .btn{
+    padding:8px 10px;
+    border-radius:10px;
+    border:0;
+    cursor:pointer;
+    font-weight:600;
+    background:var(--accent);
+    color:white;
+  }
+  .btn.ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+  }
+
+  .video-wrap{ margin-top:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  video{ max-width:100%; border-radius:10px; display:block; }
+
+  footer{ margin-top:18px; color:var(--muted); font-size:13px; }
+  @media (max-width:520px){
+    h1{ font-size:22px; }
+    .choices{ gap:8px; }
+  }
+</style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="title">
+    <h1 id="title">CRUSH MO BAKO HUUHHH BOYYY!!!???</h1>
+    <p class="lead">Sagot niya: <strong id="crushName">ALAM KO NAMAAANNN!!!</strong></p>
+
+    <div class="choices" aria-label="choices">
+      <button class="choice" data-answer="Yes">Yes</button>
+      <button class="choice" data-answer="No">No</button>
+      <button class="choice" data-answer="Maybe">Maybe</button>
+    </div>
+
+    <div class="result" id="result" aria-live="polite">
+      Piliin ang sagot :) 
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="surprise">Surprise reaction</button>
+      <button class="btn ghost" id="reset">Reset</button>
+      <button class="btn ghost" id="editText">Edit text</button>
+    </div>
+
+    <div class="video-wrap" id="videoWrap" hidden>
+      <!-- Optional: replace src with your mp4/webm in repo or public URL -->
+      <video id="clip" controls playsinline>
+        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <footer>Made with ❤️ — edit the code to change text, colors, or behavior.</footer>
+  </main>
+
+<script>
+/*
+  Quick notes:
+  - Change text in <h1>, .lead or #crushName.
+  - Replace video source in the <video> tag or remove the video block.
+  - Buttons have data-answer attributes; customize behavior in chooseAnswer().
+*/
+
+const resultEl = document.getElementById('result');
+const choices = Array.from(document.querySelectorAll('button.choice'));
+const surpriseBtn = document.getElementById('surprise');
+const resetBtn = document.getElementById('reset');
+const editBtn = document.getElementById('editText');
+const videoWrap = document.getElementById('videoWrap');
+
+function chooseAnswer(ans){
+  // playful responses; feel free to add more
+  const replies = {
+    Yes: [
+      "Uy! Mukhang may pag-asa 🤭",
+      "Chaka? Hindi. Crush? Oo.",
+      "Oho! Ipakita mo yan!"
+    ],
+    No: [
+      "Ay naku, next na lang 😅",
+      "Wag kang mag-alala, marami pang iba.",
+      "Sad pero mabuti pa ring totoo."
+    ],
+    Maybe: [
+      "Ambiguous — mag-follow up ka na!",
+      "Parang two-sided coin yan.",
+      "Kailangan ng higit pang clues..."
+    ]
+  };
+  // pick random reply
+  const arr = replies[ans] || ["Hmm..."];
+  const text = arr[Math.floor(Math.random()*arr.length)];
+  resultEl.textContent = text;
+
+  // small animation
+  resultEl.animate([{ transform: 'translateY(0)' },{ transform:'translateY(-8px)' },{ transform:'translateY(0)'}], {duration:400, easing:'ease-out'});
+}
+
+choices.forEach(btn=>{
+  btn.addEventListener('click', () => {
+    const ans = btn.dataset.answer;
+    chooseAnswer(ans);
+  });
+});
+
+surpriseBtn.addEventListener('click', () => {
+  // toggle video for surprise reaction
+  if(videoWrap.hidden){
+    videoWrap.hidden = false;
+    const v = document.getElementById('clip');
+    // try to play (may be blocked until user interacts)
+    v.currentTime = 0;
+    v.play().catch(()=>{/* autoplay may be blocked */});
+  } else {
+    videoWrap.hidden = true;
+    const v = document.getElementById('clip');
+    v.pause();
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+  resultEl.textContent = "Piliin ang sagot :)";
+  videoWrap.hidden = true;
+  const v = document.getElementById('clip');
+  if(v) v.pause();
+});
+
+editBtn.addEventListener('click', () => {
+  // small in-page editor for quick edits (not persistent)
+  const newTitle = prompt("Baguhin ang title:", document.getElementById('title').textContent);
+  if(newTitle !== null) document.getElementById('title').textContent = newTitle;
+  const newCrush = prompt("Baguhin ang line 'ALAM KO NAMAAANNN!!!':", document.getElementById('crushName').textContent);
+  if(newCrush !== null) document.getElementById('crushName').textContent = newCrush;
+  // update result text area too
+  resultEl.textContent = "Nalipat ang text — subukan ang buttons.";
+});
+</script>
+</body>
+  </html>
